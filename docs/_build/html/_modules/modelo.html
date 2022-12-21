@@ -1,0 +1,420 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>modelo &#8212; EntregaNivelAvanzado 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for modelo</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Modelo.py&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="n">messagebox</span>
+<span class="kn">from</span> <span class="nn">peewee</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">decoradores</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">observador</span> <span class="kn">import</span> <span class="n">Sujeto</span>
+<span class="kn">from</span> <span class="nn">log</span> <span class="kn">import</span> <span class="n">objetolog</span>
+
+<span class="c1"># ##############################################</span>
+<span class="c1"># FUNCIONES PARA ASIGNAR A LOS BOTONES</span>
+<span class="c1"># ##############################################</span>
+
+<span class="n">db</span> <span class="o">=</span> <span class="n">SqliteDatabase</span><span class="p">(</span><span class="s2">&quot;obra_social.db&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BaseModel"><a class="viewcode-back" href="../modelo.html#modelo.BaseModel">[docs]</a><span class="k">class</span> <span class="nc">BaseModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">database</span> <span class="o">=</span> <span class="n">db</span></div>
+
+
+<div class="viewcode-block" id="Afiliados"><a class="viewcode-back" href="../modelo.html#modelo.Afiliados">[docs]</a><span class="k">class</span> <span class="nc">Afiliados</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Clase afiliados: determina los campos que van a formar la tabla Afiliados.</span>
+<span class="sd">    -Apellido</span>
+<span class="sd">    -Nombre</span>
+<span class="sd">    -Documento&quot;&quot;&quot;</span>
+
+    <span class="n">apellido</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">()</span>
+    <span class="n">nombre</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">()</span>
+    <span class="n">documento</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">(</span><span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">create_tables</span><span class="p">([</span><span class="n">Afiliados</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="CRUD"><a class="viewcode-back" href="../modelo.html#modelo.CRUD">[docs]</a><span class="k">class</span> <span class="nc">CRUD</span><span class="p">(</span><span class="n">Sujeto</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Clase de altas, bajas, modificaciones y consultas.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@decorador_ingreso_de_registro</span>
+    <span class="k">def</span> <span class="nf">alta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apellido</span><span class="p">,</span> <span class="n">nombre</span><span class="p">,</span> <span class="n">documento</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Metodo que da un alta de registro.</span>
+<span class="sd">        Parametro1: Apellido</span>
+<span class="sd">        Parametro2: Nombre</span>
+<span class="sd">        Parametro3: Documento&quot;&quot;&quot;</span>
+        <span class="n">alfa</span> <span class="o">=</span> <span class="s2">&quot;[A-Za-z]&quot;</span>
+        <span class="n">numericos</span> <span class="o">=</span> <span class="s2">&quot;[0-9]&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">alfa</span><span class="p">,</span> <span class="n">apellido</span><span class="o">.</span><span class="n">get</span><span class="p">())</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">alfa</span><span class="p">,</span> <span class="n">nombre</span><span class="o">.</span><span class="n">get</span><span class="p">())</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">numericos</span><span class="p">,</span> <span class="n">documento</span><span class="o">.</span><span class="n">get</span><span class="p">())</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="p">):</span>
+
+                <span class="n">afiliado</span> <span class="o">=</span> <span class="n">Afiliados</span><span class="p">()</span>
+                <span class="n">afiliado</span><span class="o">.</span><span class="n">apellido</span> <span class="o">=</span> <span class="n">apellido</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="n">afiliado</span><span class="o">.</span><span class="n">nombre</span> <span class="o">=</span> <span class="n">nombre</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="n">afiliado</span><span class="o">.</span><span class="n">documento</span> <span class="o">=</span> <span class="n">documento</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="n">afiliado</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+                <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;ALTA&quot;</span><span class="p">,</span> <span class="s2">&quot;Afiliado dado de alta exitosamente!&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_treeview</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+                <span class="c1"># NOTIFICAR---------------------------------------------------</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">notificar</span><span class="p">(</span><span class="n">apellido</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">nombre</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">documento</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+                <span class="c1"># LOG---------------------------------------------------</span>
+                <span class="n">objetolog</span><span class="o">.</span><span class="n">imprimir</span><span class="p">(</span>
+                    <span class="s2">&quot;alta&quot;</span><span class="p">,</span> <span class="n">apellido</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">nombre</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">documento</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="p">)</span>
+                <span class="c1"># ---------------------------------------------------</span>
+                <span class="n">apellido</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">nombre</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">documento</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span>
+                    <span class="s2">&quot;ERROR&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;datos ingresados no válidos, verifique e intente nuevamente&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@decorador_baja_de_registro</span>
+    <span class="k">def</span> <span class="nf">borrar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Metodo que elimina el registro seleccionado.&quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">messagebox</span><span class="o">.</span><span class="n">askyesno</span><span class="p">(</span>
+                <span class="n">message</span><span class="o">=</span><span class="s2">&quot;¿Desea dar de baja a este afiliado?&quot;</span><span class="p">,</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">&quot;ADVERTENCIA&quot;</span><span class="p">,</span>
+            <span class="p">):</span>
+
+                <span class="n">valor</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">selection</span><span class="p">()</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">valor</span><span class="p">)</span>
+                <span class="n">mi_id</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
+                <span class="n">borrar</span> <span class="o">=</span> <span class="n">Afiliados</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Afiliados</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">mi_id</span><span class="p">)</span>
+                <span class="n">borrar</span><span class="o">.</span><span class="n">delete_instance</span><span class="p">()</span>
+                <span class="c1"># LOG---------------------------------------------------</span>
+                <span class="n">objetolog</span><span class="o">.</span><span class="n">imprimir</span><span class="p">(</span>
+                    <span class="s2">&quot;baja&quot;</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
+                    <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+                    <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">][</span><span class="mi">2</span><span class="p">]),</span>
+                <span class="p">)</span>
+                <span class="c1"># --------------------------------------------------</span>
+                <span class="n">tree</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">valor</span><span class="p">)</span>
+                <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span><span class="s2">&quot;ELIMINAR&quot;</span><span class="p">,</span> <span class="s2">&quot;Afiliado eliminado correctamente!&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="CRUD.modificar"><a class="viewcode-back" href="../modelo.html#modelo.CRUD.modificar">[docs]</a>    <span class="k">def</span> <span class="nf">modificar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apellido</span><span class="p">,</span> <span class="n">nombre</span><span class="p">,</span> <span class="n">documento</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Metodo que edita un registro seleccionado con doble click reemplazandolo por los parametros colocados en los campos</span>
+<span class="sd">        Parametro1: Apellido</span>
+<span class="sd">        Parametro2: Nombre</span>
+<span class="sd">        Parametro3: Documento&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">item_seleccionado</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">focus</span><span class="p">()</span>
+            <span class="n">valor_id</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">item_seleccionado</span><span class="p">)</span>
+            <span class="n">alfa</span> <span class="o">=</span> <span class="s2">&quot;[A-Za-z]&quot;</span>
+            <span class="n">numericos</span> <span class="o">=</span> <span class="s2">&quot;[0-9]&quot;</span>
+            <span class="k">if</span> <span class="n">messagebox</span><span class="o">.</span><span class="n">askyesno</span><span class="p">(</span>
+                <span class="n">message</span><span class="o">=</span><span class="s2">&quot;¿Desea editar datos del afiliado?&quot;</span><span class="p">,</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">&quot;ADVERTENCIA&quot;</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">alfa</span><span class="p">,</span> <span class="n">apellido</span><span class="o">.</span><span class="n">get</span><span class="p">())</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">alfa</span><span class="p">,</span> <span class="n">nombre</span><span class="o">.</span><span class="n">get</span><span class="p">())</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">numericos</span><span class="p">,</span> <span class="n">documento</span><span class="o">.</span><span class="n">get</span><span class="p">())</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="n">item_seleccionado</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">focus</span><span class="p">()</span>
+                    <span class="n">valor_id</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">item_seleccionado</span><span class="p">)</span>
+                    <span class="c1"># LOG---------------------------------------------------</span>
+                    <span class="n">objetolog</span><span class="o">.</span><span class="n">imprimir</span><span class="p">(</span>
+                        <span class="s2">&quot;modificar&quot;</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">valor_id</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
+                        <span class="p">(</span><span class="n">valor_id</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+                        <span class="p">(</span><span class="n">valor_id</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">][</span><span class="mi">2</span><span class="p">]),</span>
+                    <span class="p">)</span>
+                    <span class="c1"># ------------------------------------------------------</span>
+                    <span class="n">modificar</span> <span class="o">=</span> <span class="n">Afiliados</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                        <span class="n">apellido</span><span class="o">=</span><span class="n">apellido</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span>
+                        <span class="n">nombre</span><span class="o">=</span><span class="n">nombre</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span>
+                        <span class="n">documento</span><span class="o">=</span><span class="n">documento</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">Afiliados</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">valor_id</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">])</span>
+                    <span class="n">modificar</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+                    <span class="n">apellido</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="n">nombre</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="n">documento</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">actualizar_treeview</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+                    <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span>
+                        <span class="s2">&quot;MODIFICACION&quot;</span><span class="p">,</span> <span class="s2">&quot;Afiliado modificado exitosamente!&quot;</span>
+                    <span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">messagebox</span><span class="o">.</span><span class="n">showinfo</span><span class="p">(</span>
+                        <span class="s2">&quot;ERROR&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;datos ingresados no válidos, verifique e intente nuevamente&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+    <span class="nd">@decorador_actualizacion_de_registro</span>
+    <span class="k">def</span> <span class="nf">actualizar_treeview</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mitreview</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Metodo que elimina todos los registros del treeview y los vuelve a imprimir, actualizandolos.&quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">records</span> <span class="o">=</span> <span class="n">mitreview</span><span class="o">.</span><span class="n">get_children</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+                <span class="n">mitreview</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">fila</span> <span class="ow">in</span> <span class="n">Afiliados</span><span class="o">.</span><span class="n">select</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">fila</span><span class="p">)</span>
+                <span class="n">mitreview</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                    <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="mi">0</span><span class="p">,</span>
+                    <span class="n">text</span><span class="o">=</span><span class="n">fila</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">apellido</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">documento</span><span class="p">),</span>
+                <span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="CRUD.consultar"><a class="viewcode-back" href="../modelo.html#modelo.CRUD.consultar">[docs]</a>    <span class="k">def</span> <span class="nf">consultar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apellido</span><span class="p">,</span> <span class="n">nombre</span><span class="p">,</span> <span class="n">documento</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Metodo que permite buscar un Afiliado por cualquiera de sus parametros</span>
+<span class="sd">        Parametro1: Apellido</span>
+<span class="sd">        Parametro2: Nombre</span>
+<span class="sd">        Parametro3: Documento&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">apellido</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">nombre</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="n">documento</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+            <span class="n">records</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">get_children</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+                <span class="n">tree</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">fila</span> <span class="ow">in</span> <span class="n">Afiliados</span><span class="o">.</span><span class="n">select</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                        <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="mi">0</span><span class="p">,</span>
+                        <span class="n">text</span><span class="o">=</span><span class="n">fila</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                        <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">apellido</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">documento</span><span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">fila</span><span class="o">.</span><span class="n">apellido</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="mi">0</span><span class="p">,</span>
+                            <span class="n">text</span><span class="o">=</span><span class="n">fila</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                            <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">apellido</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">documento</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">fila</span><span class="o">.</span><span class="n">nombre</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="mi">0</span><span class="p">,</span>
+                            <span class="n">text</span><span class="o">=</span><span class="n">fila</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                            <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">apellido</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">documento</span><span class="p">),</span>
+                        <span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">documento</span><span class="p">)</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                        <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="mi">0</span><span class="p">,</span>
+                            <span class="n">text</span><span class="o">=</span><span class="n">fila</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                            <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">apellido</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">documento</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">apellido</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">nombre</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                        <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="mi">0</span><span class="p">,</span>
+                            <span class="n">text</span><span class="o">=</span><span class="n">fila</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                            <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">apellido</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">documento</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">apellido</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">documento</span><span class="p">)</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                        <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="mi">0</span><span class="p">,</span>
+                            <span class="n">text</span><span class="o">=</span><span class="n">fila</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                            <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">apellido</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">documento</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">nombre</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">documento</span><span class="p">)</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                        <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="mi">0</span><span class="p">,</span>
+                            <span class="n">text</span><span class="o">=</span><span class="n">fila</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                            <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">apellido</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">documento</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">apellido</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="ow">and</span> <span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">nombre</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="ow">and</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">documento</span><span class="p">)</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="p">):</span>
+                        <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                            <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                            <span class="mi">0</span><span class="p">,</span>
+                            <span class="n">text</span><span class="o">=</span><span class="n">fila</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                            <span class="n">values</span><span class="o">=</span><span class="p">(</span><span class="n">fila</span><span class="o">.</span><span class="n">apellido</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">nombre</span><span class="p">,</span> <span class="n">fila</span><span class="o">.</span><span class="n">documento</span><span class="p">),</span>
+                        <span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">EntregaNivelAvanzado</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../cliente_hex.html">cliente_hex module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cliente_str.html">cliente_str module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../controlador.html">controlador module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../decoradores.html">decoradores module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../log.html">log module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modelo.html">modelo module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../observador.html">observador module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../server.html">server module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista.html">vista module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Federico.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
